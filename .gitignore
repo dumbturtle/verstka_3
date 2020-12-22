@@ -126,3 +126,4 @@ dmypy.json
 
 .gitattributes
 .vscode
+.vscode/settings.json
