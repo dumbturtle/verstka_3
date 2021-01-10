@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
@@ -22,8 +23,14 @@ def create_directory(name):
     return directory_path if os.path.exists(directory_path) else None
 
 
-def write_data_to_file(data, full_path):
+def write_text_to_file(data, full_path):
     with open(full_path, "w") as file:
+        file.write(data)
+    return full_path if os.path.exists(full_path) else None
+
+
+def write_cover_to_file(data, full_path):
+    with open(full_path, "wb") as file:
         file.write(data)
     return full_path if os.path.exists(full_path) else None
 
@@ -31,8 +38,10 @@ def write_data_to_file(data, full_path):
 def parsing_data(text):
     soup = BeautifulSoup(text, "lxml")
     title_tag = soup.find("body").find("div", id="content").find("h1")
+    cover_tag = soup.find("body").find("div", class_="bookimage").find("img")["src"]
     title, author = title_tag.text.split("::")
-    return {"heading": title.strip(), "author": author.strip()}
+    url_cover_tag = urljoin("https://tululu.org/", cover_tag)
+    return {"heading": title.strip(), "author": author.strip(), "img": url_cover_tag}
 
 
 def download_txt(url, filename, folder="books/"):
@@ -46,12 +55,31 @@ def download_txt(url, filename, folder="books/"):
     """
     checked_filename = sanitize_filename(filename)
     checked_folder = sanitize_filename(folder)
-    book_text = get_data_from_url(url)
-    if create_directory(checked_folder) and book_text:
+    book_data = get_data_from_url(url)
+    if create_directory(checked_folder) and book_data:
         full_filepath = f"{ os.path.join(folder, checked_filename) }.txt"
-        file_path = write_data_to_file(book_text.text, full_filepath)
+        file_path = write_text_to_file(book_data.text, full_filepath)
         return file_path
     return None
+
+
+def download_cover(url, filename, folder="images/"):
+    """Функция для скачивания файлов изображений .
+    Args:
+        url (str): Cсылка изображение, который хочется скачать.
+        filename (str): Имя файла, с которым сохранять.
+        folder (str): Папка, куда сохранять.
+    Returns:
+        str: Путь до файла, куда сохранён текст.
+    """
+    checked_filename = sanitize_filename(filename)
+    checked_folder = sanitize_filename(folder)
+    cover_data = get_data_from_url(url)
+    if create_directory(checked_folder):
+        full_filepath = f"{ os.path.join(folder, checked_filename) }"
+        file_path = write_cover_to_file(cover_data.content, full_filepath)
+        return file_path
+    return []
 
 
 def download_description(url):
@@ -68,6 +96,10 @@ if __name__ == "__main__":
         url_book_description = f"https://tululu.org/b{id}/"
         book_description = download_description(url_book_description)
         if book_description:
-            filename = book_description.get("heading")
-            book_path = download_txt(url_book_text, filename)
-            print(id, book_path)
+            txt_name = book_description.get("heading")
+            cover_url = book_description.get("img")
+            cover_filename = f"{ id }.{ cover_url.split('.')[-1] }"
+            txt_filename = f"{ id }.{ txt_name }"
+            book_path = download_txt(url_book_text, txt_filename)
+            cover_path = download_cover(cover_url, cover_filename)
+            print(id, book_path, cover_path)
