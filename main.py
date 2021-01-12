@@ -45,12 +45,20 @@ def parsing_data(text):
     comments_text = [
         comment.find("span", class_="black").text for comment in comments_tag
     ]
+    genres_tag = (
+        soup.find("body")
+        .find("div", id="content")
+        .find("span", class_="d_book")
+        .find_all("a")
+    )
+    genres_text = [genre.text for genre in genres_tag]
     title, author = title_tag.text.split("::")
     url_cover_tag = urljoin("https://tululu.org/", cover_tag)
     return {
         "heading": title.strip(),
         "author": author.strip(),
         "img": url_cover_tag,
+        "genre": genres_text,
         "comments": comments_text,
     }
 
@@ -109,9 +117,10 @@ if __name__ == "__main__":
         if book_description:
             txt_name = book_description.get("heading")
             cover_url = book_description.get("img")
+            genre = book_description.get("genre")
             comments = book_description.get("comments")
             cover_filename = f"{ id }.{ cover_url.split('.')[-1] }"
             txt_filename = f"{ id }.{ txt_name }"
             book_path = download_txt(url_book_text, txt_filename)
             cover_path = download_cover(cover_url, cover_filename)
-            print(id, book_path, cover_path, *comments)
+            print(id, "Заголовок:", txt_name, genre)
