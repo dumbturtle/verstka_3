@@ -39,9 +39,20 @@ def parsing_data(text):
     soup = BeautifulSoup(text, "lxml")
     title_tag = soup.find("body").find("div", id="content").find("h1")
     cover_tag = soup.find("body").find("div", class_="bookimage").find("img")["src"]
+    comments_tag = (
+        soup.find("body").find("div", id="content").find_all("div", class_="texts")
+    )
+    comments_text = [
+        comment.find("span", class_="black").text for comment in comments_tag
+    ]
     title, author = title_tag.text.split("::")
     url_cover_tag = urljoin("https://tululu.org/", cover_tag)
-    return {"heading": title.strip(), "author": author.strip(), "img": url_cover_tag}
+    return {
+        "heading": title.strip(),
+        "author": author.strip(),
+        "img": url_cover_tag,
+        "comments": comments_text,
+    }
 
 
 def download_txt(url, filename, folder="books/"):
@@ -72,14 +83,14 @@ def download_cover(url, filename, folder="images/"):
     Returns:
         str: Путь до файла, куда сохранён текст.
     """
+    file_path = []
     checked_filename = sanitize_filename(filename)
     checked_folder = sanitize_filename(folder)
     cover_data = get_data_from_url(url)
     if create_directory(checked_folder):
         full_filepath = f"{ os.path.join(folder, checked_filename) }"
         file_path = write_cover_to_file(cover_data.content, full_filepath)
-        return file_path
-    return []
+    return file_path
 
 
 def download_description(url):
@@ -98,8 +109,9 @@ if __name__ == "__main__":
         if book_description:
             txt_name = book_description.get("heading")
             cover_url = book_description.get("img")
+            comments = book_description.get("comments")
             cover_filename = f"{ id }.{ cover_url.split('.')[-1] }"
             txt_filename = f"{ id }.{ txt_name }"
             book_path = download_txt(url_book_text, txt_filename)
             cover_path = download_cover(cover_url, cover_filename)
-            print(id, book_path, cover_path)
+            print(id, book_path, cover_path, *comments)
