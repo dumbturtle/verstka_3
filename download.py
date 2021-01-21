@@ -22,14 +22,11 @@ def create_input_parser():
 
 
 def get_data_from_url(url):
-    try:
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         response = requests.get(url, verify=False, allow_redirects=False)
         if response.status_code == 302 or response.raise_for_status():
             return None
         return response
-    except:
-        raise
 
 
 def create_directory(name: str) -> str:
@@ -117,10 +114,7 @@ def download_cover(url, filename, folder="images/"):
 
 
 def download_description(url):
-    try:
-        book_data = get_data_from_url(url)
-    except:
-        raise
+    book_data = get_data_from_url(url)
     if book_data:
         book_description = parse_book_page(book_data.text)
         return book_description
