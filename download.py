@@ -10,7 +10,7 @@ from pathvalidate import sanitize_filename, sanitize_filepath
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 
-def createParser():
+def create_input_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "start_id", type=int, nargs="?", default=1, help="Стартовый индекс"
@@ -30,6 +30,7 @@ def get_data_from_url(url):
         return response
     except:
         raise
+
 
 def create_directory(name):
     directory_path = f"./{ name }"
@@ -127,8 +128,8 @@ def download_description(url):
     return None
 
 
-if __name__ == "__main__":
-    parser = createParser()
+def main():
+    parser = create_input_parser()
     namespace = parser.parse_args()
     start_id = namespace.start_id
     end_id = namespace.end_id + 1
@@ -154,3 +155,7 @@ if __name__ == "__main__":
             print(
                 f"Индекс: { id }\nНазвание: { txt_name }\nАвтор: { book_description.get('author') }\nОбложка: {cover_path} \nФайл: { book_path }\n\n"
             )
+
+
+if __name__ == "__main__":
+    main()
