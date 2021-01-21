@@ -49,27 +49,27 @@ def write_cover_to_file(data, full_path_file):
 
 def parse_book_page(html_content):
     soup = BeautifulSoup(html_content, "lxml")
-    title_tag = soup.find("body").find("div", id="content").find("h1")
-    cover_tag = soup.find("body").find("div", class_="bookimage").find("img")["src"]
-    comments_tag = (
+    tag_title = soup.find("body").find("div", id="content").find("h1")
+    tag_cover = soup.find("body").find("div", class_="bookimage").find("img")["src"]
+    tag_comments = (
         soup.find("body").find("div", id="content").find_all("div", class_="texts")
     )
     book_comments = [
-        comment.find("span", class_="black").text for comment in comments_tag
+        comment.find("span", class_="black").text for comment in tag_comments
     ]
-    genres_tag = (
+    tag_genres = (
         soup.find("body")
         .find("div", id="content")
         .find("span", class_="d_book")
         .find_all("a")
     )
-    book_genres = [genre.text for genre in genres_tag]
-    book_title, book_author = title_tag.text.split("::")
-    book_url_cover_tag = urljoin("https://tululu.org/", cover_tag)
+    book_genres = [genre.text for genre in tag_genres]
+    book_title, book_author = tag_title.text.split("::")
+    book_url_tag_cover = urljoin("https://tululu.org/", tag_cover)
     return {
         "heading": book_title.strip(),
         "author": book_author.strip(),
-        "img": book_url_cover_tag,
+        "img": book_url_tag_cover,
         "genre": book_genres,
         "comments": book_comments,
     }
@@ -88,9 +88,9 @@ def download_txt(url, filename, folder="books/"):
     checked_folder = sanitize_filename(folder)
     book_data = get_data_from_url(url)
     if create_directory(checked_folder) and book_data:
-        full_filepath = f"{ os.path.join(folder, checked_filename) }.txt"
-        file_path = write_text_to_file(book_data.text, full_filepath)
-        return file_path
+        string_filepath = f"{ os.path.join(folder, checked_filename) }.txt"
+        filepath_file_with_data = write_text_to_file(book_data.text, string_filepath)
+        return filepath_file_with_data
     return None
 
 
@@ -103,14 +103,16 @@ def download_cover(url, filename, folder="images/"):
     Returns:
         str: Путь до файла, куда сохранён текст.
     """
-    file_path = []
+    filepath_file_with_data = []
     checked_filename = sanitize_filename(filename)
     checked_folder = sanitize_filename(folder)
     cover_data = get_data_from_url(url)
     if create_directory(checked_folder):
-        full_filepath = f"{ os.path.join(folder, checked_filename) }"
-        file_path = write_cover_to_file(cover_data.content, full_filepath)
-    return file_path
+        string_filepath = f"{ os.path.join(folder, checked_filename) }"
+        filepath_file_with_data = write_cover_to_file(
+            cover_data.content, string_filepath
+        )
+    return filepath_file_with_data
 
 
 def download_description(url):
@@ -125,10 +127,10 @@ def main():
     input_parser = create_input_parser()
     book_range_id = input_parser.parse_args()
     for id in range(book_range_id.start_id, book_range_id.end_id + 1):
-        url_book_text = f"https://tululu.org/txt.php?id={id}"
-        url_book_description = f"https://tululu.org/b{id}/"
+        book_text_url = f"https://tululu.org/txt.php?id={id}"
+        book_description_url = f"https://tululu.org/b{id}/"
         try:
-            book_description = download_description(url_book_description)
+            book_description = download_description(book_description_url)
         except:
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
             break
@@ -138,9 +140,11 @@ def main():
             book_genres = book_description.get("genre")
             book_comments = book_description.get("comments")
             book_author = book_description.get("author")
-            book_cover_filename = f"{ id }.{ book_title }.{ book_cover_url.split('.')[-1] }"
+            book_cover_filename = (
+                f"{ id }.{ book_title }.{ book_cover_url.split('.')[-1] }"
+            )
             book_txt_filename = f"{ id }.{ book_title }"
-            book_txt_path = download_txt(url_book_text, book_txt_filename)
+            book_txt_path = download_txt(book_text_url, book_txt_filename)
             if not book_txt_path:
                 book_txt_path = "Книга в формате txt отсутвует!"
             book_cover_path = download_cover(book_cover_url, book_cover_filename)
