@@ -13,10 +13,18 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 def create_input_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "start_id", type=int, nargs="?", default=1, help="Стартовый индекс"
+        "-s",
+        "--start_id",
+        type=int,
+        default=1,
+        help="Начальный индекс. По умолчанию: 1 ",
     )
     parser.add_argument(
-        "end_id", type=int, nargs="?", default=10, help="Последний индекс"
+        "-e",
+        "--end_id",
+        type=int,
+        default=10,
+        help="Последний индекс.  По умолчанию: 10",
     )
     return parser
 
@@ -152,8 +160,9 @@ def main():
                 f"Индекс: { id }\nНазвание: { book_title }\nАвтор: { book_author }\nОбложка: {book_cover_path} \nФайл: { book_txt_path }\n\n"
             )
         else:
-            print("Что-то пошло не так:( Не возможно получить информацию с сайта!")
-            break
+            print(
+                f"Что-то пошло не так c { id }:( Не возможно получить информацию с сайта!"
+            )
 
 
 if __name__ == "__main__":
