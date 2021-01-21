@@ -22,11 +22,11 @@ def create_input_parser():
 
 
 def get_data_from_url(url):
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-        response = requests.get(url, verify=False, allow_redirects=False)
-        if response.status_code == 302 or response.raise_for_status():
-            return None
-        return response
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    response = requests.get(url, verify=False, allow_redirects=False)
+    if response.status_code == 302 or response.raise_for_status():
+        return None
+    return response
 
 
 def create_directory(name: str) -> str:
@@ -35,16 +35,16 @@ def create_directory(name: str) -> str:
     return directory_path
 
 
-def write_text_to_file(data, full_path):
-    with open(full_path, "w") as file:
+def write_text_to_file(data, full_path_file):
+    with open(full_path_file, "w") as file:
         file.write(data)
-    return full_path if os.path.exists(full_path) else None
+    return full_path_file if os.path.exists(full_path_file) else None
 
 
-def write_cover_to_file(data, full_path):
-    with open(full_path, "wb") as file:
+def write_cover_to_file(data, full_path_file):
+    with open(full_path_file, "wb") as file:
         file.write(data)
-    return full_path if os.path.exists(full_path) else None
+    return full_path_file if os.path.exists(full_path_file) else None
 
 
 def parse_book_page(html_content):
@@ -54,7 +54,7 @@ def parse_book_page(html_content):
     comments_tag = (
         soup.find("body").find("div", id="content").find_all("div", class_="texts")
     )
-    comments_text = [
+    book_comments = [
         comment.find("span", class_="black").text for comment in comments_tag
     ]
     genres_tag = (
@@ -63,15 +63,15 @@ def parse_book_page(html_content):
         .find("span", class_="d_book")
         .find_all("a")
     )
-    genres_text = [genre.text for genre in genres_tag]
-    title, author = title_tag.text.split("::")
-    url_cover_tag = urljoin("https://tululu.org/", cover_tag)
+    book_genres = [genre.text for genre in genres_tag]
+    book_title, book_author = title_tag.text.split("::")
+    book_url_cover_tag = urljoin("https://tululu.org/", cover_tag)
     return {
-        "heading": title.strip(),
-        "author": author.strip(),
-        "img": url_cover_tag,
-        "genre": genres_text,
-        "comments": comments_text,
+        "heading": book_title.strip(),
+        "author": book_author.strip(),
+        "img": book_url_cover_tag,
+        "genre": book_genres,
+        "comments": book_comments,
     }
 
 
@@ -122,11 +122,9 @@ def download_description(url):
 
 
 def main():
-    parser = create_input_parser()
-    namespace = parser.parse_args()
-    start_id = namespace.start_id
-    end_id = namespace.end_id + 1
-    for id in range(start_id, end_id):
+    input_parser = create_input_parser()
+    book_range_id = input_parser.parse_args()
+    for id in range(book_range_id.start_id, book_range_id.end_id + 1):
         url_book_text = f"https://tululu.org/txt.php?id={id}"
         url_book_description = f"https://tululu.org/b{id}/"
         try:
@@ -135,18 +133,19 @@ def main():
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
             break
         if book_description:
-            txt_name = book_description.get("heading")
-            cover_url = book_description.get("img")
-            genre = book_description.get("genre")
-            comments = book_description.get("comments")
-            cover_filename = f"{ id }.{ txt_name }.{ cover_url.split('.')[-1] }"
-            txt_filename = f"{ id }.{ txt_name }"
-            book_path = download_txt(url_book_text, txt_filename)
-            if not book_path:
-                book_path = "Книга в формате txt отсутвует!"
-            cover_path = download_cover(cover_url, cover_filename)
+            book_title = book_description.get("heading")
+            book_cover_url = book_description.get("img")
+            book_genres = book_description.get("genre")
+            book_comments = book_description.get("comments")
+            book_author = book_description.get("author")
+            book_cover_filename = f"{ id }.{ book_title }.{ book_cover_url.split('.')[-1] }"
+            book_txt_filename = f"{ id }.{ book_title }"
+            book_txt_path = download_txt(url_book_text, book_txt_filename)
+            if not book_txt_path:
+                book_txt_path = "Книга в формате txt отсутвует!"
+            book_cover_path = download_cover(book_cover_url, book_cover_filename)
             print(
-                f"Индекс: { id }\nНазвание: { txt_name }\nАвтор: { book_description.get('author') }\nОбложка: {cover_path} \nФайл: { book_path }\n\n"
+                f"Индекс: { id }\nНазвание: { book_title }\nАвтор: { book_author }\nОбложка: {book_cover_path} \nФайл: { book_txt_path }\n\n"
             )
 
 
