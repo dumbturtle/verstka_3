@@ -131,7 +131,7 @@ def main():
         book_description_url = f"https://tululu.org/b{id}/"
         try:
             book_description = download_description(book_description_url)
-        except:
+        except requests.exceptions.ConnectionError:
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
             break
         if book_description:
@@ -151,6 +151,9 @@ def main():
             print(
                 f"Индекс: { id }\nНазвание: { book_title }\nАвтор: { book_author }\nОбложка: {book_cover_path} \nФайл: { book_txt_path }\n\n"
             )
+        else:
+            print("Что-то пошло не так:( Не возможно получить информацию с сайта!")
+            break
 
 
 if __name__ == "__main__":
