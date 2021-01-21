@@ -32,11 +32,10 @@ def get_data_from_url(url):
         raise
 
 
-def create_directory(name):
+def create_directory(name: str) -> str:
     directory_path = f"./{ name }"
-    if not os.path.exists(directory_path):
-        Path(directory_path).mkdir(parents=True, exist_ok=True)
-    return directory_path if os.path.exists(directory_path) else None
+    Path(directory_path).mkdir(parents=True, exist_ok=True)
+    return directory_path
 
 
 def write_text_to_file(data, full_path):
