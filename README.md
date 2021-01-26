@@ -13,15 +13,23 @@
 - Скачиваем скрипт с [github](https://github.com/dumbturtle/verstka_3)
 - Устанавливаем необходимые пакеты: 
      
-```$pip install -r requirements.txt```
+```
+$ pip install -r requirements.txt
+```
 - Первый вариант запуска скрипта:  
     
-```$python download.py``` 
+```
+$ python download.py
+``` 
 - Второй вариант запуска скрипта:
    
-```$python download.py --start_id 20 --end_id 40```
+```
+$ python download.py --start_id 20 --end_id 40
+```
 
-```$python download.py -s 20 -e 40```
+```
+$ python download.py -s 20 -e 40
+```
 
 Если при запуске возникнет ошибка, будет выведено соответствующее сообщение в консоли.
 
@@ -38,7 +46,7 @@
 Первый аргумент `--start_id` или `-s` определяет стартовый индекс с которого начнется скачивание книг. 
 Второй аргумент `--end_id` или `-e` определяет индекс на котором скрипт закончит скачивание. По умолчанию скачиваются книги с индексом от 1 до 10.
 ```
-$ python download.py --start_id --end_id
+$ python download.py --start_id 37 --end_id 48
 ```
 
 
