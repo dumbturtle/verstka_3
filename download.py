@@ -103,7 +103,7 @@ def download_txt(url, filename, folder="books/"):
 
 
 def download_cover(url, filename, folder="images/"):
-    """Функция для скачивания файлов изображений .
+    """Функция для скачивания файлов изображений.
     Args:
         url (str): Cсылка изображение, который хочется скачать.
         filename (str): Имя файла, с которым сохранять.
@@ -154,14 +154,14 @@ def main():
             book_txt_filename = f"{ id }.{ book_title }"
             book_txt_path = download_txt(book_text_url, book_txt_filename)
             if not book_txt_path:
-                book_txt_path = "Книга в формате txt отсутвует!"
+                book_txt_path = "Книга в формате txt отсутствует!"
             book_cover_path = download_cover(book_cover_url, book_cover_filename)
             print(
                 f"Индекс: { id }\nНазвание: { book_title }\nАвтор: { book_author }\nОбложка: {book_cover_path} \nФайл: { book_txt_path }\n\n"
             )
         else:
             print(
-                f"Что-то пошло не так c { id }:( Не возможно получить информацию с сайта!"
+                f"Что-то пошло не так c { id }:( Невозможно получить информацию с сайта!"
             )
 
 
