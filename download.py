@@ -137,8 +137,8 @@ def download_book_description(url):
 
 def main():
     input_parser = create_input_parser()
-    book_id_interval = input_parser.parse_args()
-    for id in range(book_id_interval.start_id, book_id_interval.end_id + 1):
+    args = input_parser.parse_args()
+    for id in range(args.start_id, args.end_id + 1):
         book_text_url = f"https://tululu.org/txt.php?id={id}"
         book_description_url = f"https://tululu.org/b{id}/"
         try:
@@ -156,7 +156,7 @@ def main():
                 f"{ id }.{ book_title }.{ book_cover_url.split('.')[-1] }"
             )
             book_text_filename = f"{ id }.{ book_title }"
-            book_text_path = download_txt(book_text_url, book_txt_filename)
+            book_text_path = download_book_text(book_text_url, book_text_filename)
             if not book_text_path:
                 book_text_path = "Книга в формате txt отсутствует!"
             book_cover_path = download_cover(book_cover_url, book_cover_filename)
