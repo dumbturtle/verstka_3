@@ -32,8 +32,9 @@ def create_input_parser():
 def get_data_from_url(url):
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     tululu_response = requests.get(url, verify=False, allow_redirects=False)
-    if tululu_response.status_code == 302 or tululu_response.raise_for_status():
-        return None
+    tululu_response.raise_for_status()
+    if tululu_response.status_code == 302:
+        raise requests.exceptions.HTTPError
     return tululu_response
 
 
@@ -56,7 +57,7 @@ def write_cover_to_file(data, full_path_file):
 
 
 def parse_book_page(html_content):
-    tululu_html_soup = BeautifulSoup(html_content, "lxml")
+    tululu_html_soup = BeautifulSoup(html_content.text, "lxml")
     title_tag = tululu_html_soup.find("body").find("div", id="content").find("h1")
     cover_tag = (
         tululu_html_soup.find("body").find("div", class_="bookimage").find("img")["src"]
@@ -127,14 +128,6 @@ def download_cover(url, filename, folder="images/"):
     return file_with_data_filepath 
 
 
-def download_book_description(url):
-    book_data = get_data_from_url(url)
-    if book_data:
-        book_description = parse_book_page(book_data.text)
-        return book_description
-    return None
-
-
 def main():
     input_parser = create_input_parser()
     args = input_parser.parse_args()
@@ -142,10 +135,14 @@ def main():
         book_text_url = f"https://tululu.org/txt.php?id={id}"
         book_description_url = f"https://tululu.org/b{id}/"
         try:
-            book_description = download_book_description(book_description_url)
+            book_data = get_data_from_url(book_description_url)
+            book_description = parse_book_page(book_data)
         except requests.exceptions.ConnectionError:
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
             break
+        except requests.exceptions.HTTPError:
+            print(f"Что-то пошло не так c { id }:( Невозможно получить информацию с сайта!")
+            continue
         if book_description:
             book_title = book_description.get("heading")
             book_cover_url = book_description.get("cover")
@@ -160,13 +157,15 @@ def main():
             if not book_text_path:
                 book_text_path = "Книга в формате txt отсутствует!"
             book_cover_path = download_cover(book_cover_url, book_cover_filename)
+            if not book_cover_path:
+                book_cover_path = "Обожка для книги отсутствует!"
             print(
                 f"Индекс: { id }\nНазвание: { book_title }\nАвтор: { book_author }\nОбложка: {book_cover_path} \nФайл: { book_text_path }\n\n"
             )
-        else:
-            print(
-                f"Что-то пошло не так c { id }:( Невозможно получить информацию с сайта!"
-            )
+        # else:
+        #     print(
+        #         f"Что-то пошло не так c { id }:( Невозможно получить информацию с сайта!"
+        #     )
 
 
 if __name__ == "__main__":
