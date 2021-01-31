@@ -24,7 +24,7 @@ def create_input_parser():
         "--end_id",
         type=int,
         default=10,
-        help="Последний индекс.  По умолчанию: 10",
+        help="Последний индекс. По умолчанию: 10",
     )
     return parser_id
 
@@ -46,13 +46,13 @@ def create_directory(name: str) -> str:
 def write_text_to_file(data, full_path_file):
     with open(full_path_file, "w") as file:
         file.write(data)
-    return full_path_file if os.path.exists(full_path_file) else None
+    return full_path_file 
 
 
 def write_cover_to_file(data, full_path_file):
     with open(full_path_file, "wb") as file:
         file.write(data)
-    return full_path_file if os.path.exists(full_path_file) else None
+    return full_path_file
 
 
 def parse_book_page(html_content):
@@ -98,12 +98,14 @@ def download_book_text(url, filename, folder="books/") -> str:
     """
     checked_filename = sanitize_filename(filename)
     checked_folder = sanitize_filename(folder)
-    book_data = get_data_from_url(url)
-    if create_directory(checked_folder) and book_data:
-        string_filepath = f"{ os.path.join(folder, checked_filename) }.txt"
-        file_with_data_filepath = write_text_to_file(book_data.text, string_filepath)
-        return file_with_data_filepath
-    return "Книга в формате txt отсутствует!"
+    Path(f"./{ folder }").mkdir(parents=True, exist_ok=True)
+    try:
+        book_data = get_data_from_url(url)
+    except requests.exceptions.HTTPError:
+        return "Книга в формате txt отсутствует!"
+    string_filepath = f"{ os.path.join(folder, checked_filename) }.txt"
+    file_with_data_filepath = write_text_to_file(book_data.text, string_filepath)
+    return file_with_data_filepath
 
 
 def download_cover(url, filename, folder="images/") -> str:
@@ -115,15 +117,15 @@ def download_cover(url, filename, folder="images/") -> str:
     Returns:
         str: Путь до файла, куда сохранён текст.
     """
-    file_with_data_filepath = "Обожка для книги отсутствует!"
     checked_filename = sanitize_filename(filename)
     checked_folder = sanitize_filename(folder)
-    cover_data = get_data_from_url(url)
-    if create_directory(checked_folder):
-        string_filepath = f"{ os.path.join(folder, checked_filename) }"
-        file_with_data_filepath = write_cover_to_file(
-            cover_data.content, string_filepath
-        )
+    Path(f"./{ folder }").mkdir(parents=True, exist_ok=True)
+    try:
+        cover_data = get_data_from_url(url)
+    except requests.exceptions.HTTPError:
+        return "Обложка отсутствует!"
+    string_filepath = f"{ os.path.join(folder, checked_filename) }"
+    file_with_data_filepath = write_cover_to_file(cover_data.content, string_filepath)
     return file_with_data_filepath
 
 
@@ -137,28 +139,27 @@ def main():
         try:
             book_data = get_data_from_url(book_description_url)
             book_description = parse_book_page(book_data)
-            book_title = book_description.get("heading")
-            book_cover_url = book_description.get("cover")
-            book_genres = book_description.get("genres")
-            book_comments = book_description.get("comments")
-            book_author = book_description.get("author")
-            book_cover_filename = (
-                f"{ id }.{ book_title }.{ book_cover_url.split('.')[-1] }"
-            )
-            book_text_filename = f"{ id }.{ book_title }"
-            book_text_path = download_book_text(book_text_url, book_text_filename)
-            book_cover_path = download_cover(book_cover_url, book_cover_filename)
-            print(
-                f"Индекс: { id }\nНазвание: { book_title }\nАвтор: { book_author }\nОбложка: {book_cover_path} \nФайл: { book_text_path }\n\n"
-            )
         except requests.exceptions.ConnectionError:
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
-            break
-        except requests.exceptions.HTTPError:
-            print(
-                f"Что-то пошло не так c { id }:( Невозможно получить информацию с сайта!"
-            )
             continue
+        except requests.exceptions.HTTPError:
+            print(f"Книга с индексом: { id }  не существует!\n\n")
+            continue
+        book_title = book_description.get("heading")
+        book_cover_url = book_description.get("cover")
+        book_genres = book_description.get("genres")
+        book_comments = book_description.get("comments")
+        book_author = book_description.get("author")
+        book_cover_filename = (
+            f"{ id }.{ book_title }.{ book_cover_url.split('.')[-1] }"
+        )
+        book_text_filename = f"{ id }.{ book_title }"
+    
+        book_text_path = download_book_text(book_text_url, book_text_filename)
+        book_cover_path = download_cover(book_cover_url, book_cover_filename)
+        print(
+                f"Индекс: { id }\nНазвание: { book_title }\nАвтор: { book_author }\nОбложка: {book_cover_path} \nФайл: { book_text_path }\n\n"
+            )
 
 
 if __name__ == "__main__":
