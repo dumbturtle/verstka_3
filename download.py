@@ -97,7 +97,6 @@ def download_book_text(url, filename, folder="books/") -> str:
         str: Путь до файла, куда сохранён текст.
     """
     checked_filename = sanitize_filename(filename)
-    checked_folder = sanitize_filename(folder)
     Path(f"./{ folder }").mkdir(parents=True, exist_ok=True)
     try:
         book_data = get_data_from_url(url)
@@ -118,7 +117,6 @@ def download_cover(url, filename, folder="images/") -> str:
         str: Путь до файла, куда сохранён текст.
     """
     checked_filename = sanitize_filename(filename)
-    checked_folder = sanitize_filename(folder)
     Path(f"./{ folder }").mkdir(parents=True, exist_ok=True)
     try:
         cover_data = get_data_from_url(url)
@@ -143,7 +141,7 @@ def main():
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
             continue
         except requests.exceptions.HTTPError:
-            print(f"Книга с индексом: { id }  не существует!\n\n")
+            print(f"Книга с индексом:   { id }  не существует!\n\n")
             continue
         book_title = book_description.get("heading")
         book_cover_url = book_description.get("cover")
