@@ -88,7 +88,7 @@ def parse_book_page(html_content):
     }
 
 
-def download_book_text(url, filename, folder="books/"):
+def download_book_text(url, filename, folder="books/") -> str:
     """Функция для скачивания текстовых файлов.
     Args:
         url (str): Cсылка на текст, который хочется скачать.
@@ -104,10 +104,10 @@ def download_book_text(url, filename, folder="books/"):
         string_filepath = f"{ os.path.join(folder, checked_filename) }.txt"
         file_with_data_filepath = write_text_to_file(book_data.text, string_filepath)
         return file_with_data_filepath
-    return None
+    return "Книга в формате txt отсутствует!"
 
 
-def download_cover(url, filename, folder="images/"):
+def download_cover(url, filename, folder="images/") -> str:
     """Функция для скачивания файлов изображений.
     Args:
         url (str): Cсылка изображение, который хочется скачать.
@@ -116,16 +116,16 @@ def download_cover(url, filename, folder="images/"):
     Returns:
         str: Путь до файла, куда сохранён текст.
     """
-    file_with_data_filepath = []
+    file_with_data_filepath = "Обожка для книги отсутствует!"
     checked_filename = sanitize_filename(filename)
     checked_folder = sanitize_filename(folder)
     cover_data = get_data_from_url(url)
     if create_directory(checked_folder):
         string_filepath = f"{ os.path.join(folder, checked_filename) }"
-        file_with_data_filepath  = write_cover_to_file(
+        file_with_data_filepath = write_cover_to_file(
             cover_data.content, string_filepath
         )
-    return file_with_data_filepath 
+    return file_with_data_filepath
 
 
 def main():
@@ -137,13 +137,6 @@ def main():
         try:
             book_data = get_data_from_url(book_description_url)
             book_description = parse_book_page(book_data)
-        except requests.exceptions.ConnectionError:
-            print("Что-то пошло не так:( Проверьте подключение к интернету!")
-            break
-        except requests.exceptions.HTTPError:
-            print(f"Что-то пошло не так c { id }:( Невозможно получить информацию с сайта!")
-            continue
-        if book_description:
             book_title = book_description.get("heading")
             book_cover_url = book_description.get("cover")
             book_genres = book_description.get("genres")
@@ -154,18 +147,18 @@ def main():
             )
             book_text_filename = f"{ id }.{ book_title }"
             book_text_path = download_book_text(book_text_url, book_text_filename)
-            if not book_text_path:
-                book_text_path = "Книга в формате txt отсутствует!"
             book_cover_path = download_cover(book_cover_url, book_cover_filename)
-            if not book_cover_path:
-                book_cover_path = "Обожка для книги отсутствует!"
             print(
                 f"Индекс: { id }\nНазвание: { book_title }\nАвтор: { book_author }\nОбложка: {book_cover_path} \nФайл: { book_text_path }\n\n"
             )
-        # else:
-        #     print(
-        #         f"Что-то пошло не так c { id }:( Невозможно получить информацию с сайта!"
-        #     )
+        except requests.exceptions.ConnectionError:
+            print("Что-то пошло не так:( Проверьте подключение к интернету!")
+            break
+        except requests.exceptions.HTTPError:
+            print(
+                f"Что-то пошло не так c { id }:( Невозможно получить информацию с сайта!"
+            )
+            continue
 
 
 if __name__ == "__main__":
