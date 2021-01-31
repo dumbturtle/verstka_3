@@ -30,7 +30,6 @@ def create_input_parser():
 
 
 def get_data_from_url(url):
-    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     tululu_response = requests.get(url, verify=False, allow_redirects=False)
     tululu_response.raise_for_status()
     if tululu_response.status_code == 302:
@@ -129,6 +128,7 @@ def download_cover(url, filename, folder="images/") -> str:
 
 
 def main():
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     input_parser = create_input_parser()
     args = input_parser.parse_args()
     for id in range(args.start_id, args.end_id + 1):
