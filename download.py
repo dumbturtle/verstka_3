@@ -38,12 +38,6 @@ def get_data_from_url(url):
     return tululu_response
 
 
-def create_directory(name: str) -> str:
-    directory_path = f"./{ name }"
-    Path(directory_path).mkdir(parents=True, exist_ok=True)
-    return directory_path
-
-
 def write_text_to_file(data, full_path_file):
     with open(full_path_file, "w") as file:
         file.write(data)
