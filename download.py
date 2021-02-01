@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import time
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -139,6 +140,7 @@ def main():
             book_description = parse_book_page(book_data)
         except requests.exceptions.ConnectionError:
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
+            time.sleep(4)
             continue
         except requests.exceptions.HTTPError:
             print(f"Книга с индексом:   { id }  не существует!\n\n")
