@@ -12,22 +12,22 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 
 def create_input_parser():
-    parser_id = argparse.ArgumentParser()
-    parser_id.add_argument(
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
         "-s",
         "--start_id",
         type=int,
         default=1,
         help="Начальный индекс. По умолчанию: 1 ",
     )
-    parser_id.add_argument(
+    parser.add_argument(
         "-e",
         "--end_id",
         type=int,
         default=10,
         help="Последний индекс. По умолчанию: 10",
     )
-    return parser_id
+    return parser
 
 
 def get_data_from_url(url):
@@ -38,22 +38,22 @@ def get_data_from_url(url):
     return tululu_response
 
 
-def write_text_to_file(data, full_path_file):
+def write_file_text(data, full_path_file):
     with open(full_path_file, "w") as file:
         file.write(data)
     return full_path_file 
 
 
-def write_cover_to_file(data, full_path_file):
+def write_file_cover(data, full_path_file):
     with open(full_path_file, "wb") as file:
         file.write(data)
     return full_path_file
 
 
-def parse_book_page(html_content):
-    tululu_html_soup = BeautifulSoup(html_content.text, "lxml")
+def parse_book_page(tululu_html):
+    tululu_html_soup = BeautifulSoup(tululu_html, "lxml")
     title_tag = tululu_html_soup.find("body").find("div", id="content").find("h1")
-    cover_tag = (
+    cover_link = (
         tululu_html_soup.find("body").find("div", class_="bookimage").find("img")["src"]
     )
     comments_tag = (
@@ -72,11 +72,11 @@ def parse_book_page(html_content):
     )
     book_genres = [genre.text for genre in genres_tag]
     book_title, book_author = title_tag.text.split("::")
-    book_cover_url = urljoin("https://tululu.org/", cover_tag)
+    book_cover_full_link = urljoin("https://tululu.org/", cover_link)
     return {
         "heading": book_title.strip(),
         "author": book_author.strip(),
-        "cover": book_cover_url,
+        "cover": book_cover_full_link,
         "genres": book_genres,
         "comments": book_comments,
     }
@@ -91,14 +91,14 @@ def download_book_text(url, filename, folder="books/") -> str:
     Returns:
         str: Путь до файла, куда сохранён текст.
     """
-    checked_filename = sanitize_filename(filename)
+    sanitized_filename = sanitize_filename(filename)
     Path(f"./{ folder }").mkdir(parents=True, exist_ok=True)
     try:
         book_data = get_data_from_url(url)
     except requests.exceptions.HTTPError:
         return "Книга в формате txt отсутствует!"
-    string_filepath = f"{ os.path.join(folder, checked_filename) }.txt"
-    file_with_data_filepath = write_text_to_file(book_data.text, string_filepath)
+    string_filepath = f"{ os.path.join(folder, sanitized_filename) }.txt"
+    file_with_data_filepath = write_file_text(book_data.text, string_filepath)
     return file_with_data_filepath
 
 
@@ -111,14 +111,14 @@ def download_cover(url, filename, folder="images/") -> str:
     Returns:
         str: Путь до файла, куда сохранён текст.
     """
-    checked_filename = sanitize_filename(filename)
+    sanitized_filename = sanitize_filename(filename)
     Path(f"./{ folder }").mkdir(parents=True, exist_ok=True)
     try:
         cover_data = get_data_from_url(url)
     except requests.exceptions.HTTPError:
         return "Обложка отсутствует!"
-    string_filepath = f"{ os.path.join(folder, checked_filename) }"
-    file_with_data_filepath = write_cover_to_file(cover_data.content, string_filepath)
+    string_filepath = f"{ os.path.join(folder, sanitized_filename) }"
+    file_with_data_filepath = write_file_cover(cover_data.content, string_filepath)
     return file_with_data_filepath
 
 
@@ -131,7 +131,7 @@ def main():
         book_description_url = f"https://tululu.org/b{id}/"
         try:
             book_data = get_data_from_url(book_description_url)
-            book_description = parse_book_page(book_data)
+            book_description = parse_book_page(book_data.text)
         except requests.exceptions.ConnectionError:
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
             time.sleep(4)
