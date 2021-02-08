@@ -61,6 +61,7 @@ def parse_book_page(tululu_html):
         .find("div", id="content")
         .find_all("div", class_="texts")
     )
+    print(comments_tag)
     book_comments = [
         comment.find("span", class_="black").text for comment in comments_tag
     ]
