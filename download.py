@@ -50,30 +50,31 @@ def write_file_cover(data, full_path_file):
     return full_path_file
 
 
-def parse_book_page(tululu_html):
+def parse_book_page(book_description_url):
+    data_from_url = get_data_from_url(book_description_url)
+    tululu_html = data_from_url.text
     tululu_html_soup = BeautifulSoup(tululu_html, "lxml")
     title_tag = tululu_html_soup.find("body").find("div", id="content").find("h1")
     cover_link = (
         tululu_html_soup.find("body").find("div", class_="bookimage").find("img")["src"]
     )
-    comments_tag = (
+    comment_tags = (
         tululu_html_soup.find("body")
         .find("div", id="content")
         .find_all("div", class_="texts")
     )
-    print(comments_tag)
     book_comments = [
-        comment.find("span", class_="black").text for comment in comments_tag
+        comment.find("span", class_="black").text for comment in comment_tags
     ]
-    genres_tag = (
+    genre_tags = (
         tululu_html_soup.find("body")
         .find("div", id="content")
         .find("span", class_="d_book")
         .find_all("a")
     )
-    book_genres = [genre.text for genre in genres_tag]
+    book_genres = [genre.text for genre in genre_tags]
     book_title, book_author = title_tag.text.split("::")
-    book_cover_full_link = urljoin("https://tululu.org/", cover_link)
+    book_cover_full_link = urljoin(book_description_url, cover_link)
     return {
         "heading": book_title.strip(),
         "author": book_author.strip(),
@@ -131,8 +132,7 @@ def main():
         book_text_url = f"https://tululu.org/txt.php?id={id}"
         book_description_url = f"https://tululu.org/b{id}/"
         try:
-            book_data = get_data_from_url(book_description_url)
-            book_description = parse_book_page(book_data.text)
+            book_description = parse_book_page(book_description_url)
         except requests.exceptions.ConnectionError:
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
             time.sleep(4)
