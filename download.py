@@ -104,7 +104,7 @@ def download_book_text(url, filename, folder="books/") -> str:
     make_folder(folder)
     book_data = get_data_from_url(url)
     full_filepath = f"{ os.path.join(folder, sanitized_filename) }.txt"
-    file_text_filepath = write_file_text(book_data.text, string_filepath)
+    file_text_filepath = write_file_text(book_data.text, full_filepath)
     return file_text_filepath
 
 
