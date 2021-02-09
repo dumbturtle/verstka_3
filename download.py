@@ -155,16 +155,24 @@ def main():
         )
         book_text_filename = f"{ id }.{ book_title }"
         try:
-            book_text_path = download_book_text(book_text_url, book_text_filename)
+            book_text_path = download_book_text(
+                book_text_url, book_text_filename)
         except requests.exceptions.HTTPError:
             book_text_path = "Книга в формате txt отсутствует!"
         try:
-            book_cover_path = download_cover(book_cover_url, book_cover_filename)
+            book_cover_path = download_cover(
+                book_cover_url, book_cover_filename)
         except requests.exceptions.HTTPError:
             book_cover_path = "Обложка отсутствует!"
-        print(
-            f"Индекс: { id }\nНазвание: { book_title }\nАвтор: { book_author }\nОбложка: {book_cover_path} \nФайл: { book_text_path }\n\n"
-        )
+        print(f'''
+Индекс: { id }
+Название: { book_title }
+Автор: { book_author }
+Обложка: {book_cover_path}
+Файл: { book_text_path }
+
+'''
+              )
 
 
 if __name__ == "__main__":
