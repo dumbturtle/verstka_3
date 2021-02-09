@@ -103,9 +103,9 @@ def download_book_text(url, filename, folder="books/") -> str:
     sanitized_filename = sanitize_filename(filename)
     make_folder(folder)
     book_data = get_data_from_url(url)
-    string_filepath = f"{ os.path.join(folder, sanitized_filename) }.txt"
-    file_with_data_filepath = write_file_text(book_data.text, string_filepath)
-    return file_with_data_filepath
+    full_filepath = f"{ os.path.join(folder, sanitized_filename) }.txt"
+    file_text_filepath = write_file_text(book_data.text, string_filepath)
+    return file_text_filepath
 
 
 def download_cover(url, filename, folder="images/") -> str:
@@ -119,14 +119,10 @@ def download_cover(url, filename, folder="images/") -> str:
     """
     sanitized_filename = sanitize_filename(filename)
     make_folder(folder)
-    try:
-        cover_data = get_data_from_url(url)
-    except requests.exceptions.HTTPError:
-        return "Обложка отсутствует!"
-    string_filepath = f"{ os.path.join(folder, sanitized_filename) }"
-    file_with_data_filepath = write_file_cover(
-        cover_data.content, string_filepath)
-    return file_with_data_filepath
+    cover_data = get_data_from_url(url)
+    full_filepath = os.path.join(folder, sanitized_filename)
+    file_cover_filepath = write_file_cover(cover_data.content, full_filepath)
+    return file_cover_filepath
 
 
 def main():
@@ -143,7 +139,7 @@ def main():
             time.sleep(4)
             continue
         except requests.exceptions.HTTPError:
-            print(f"Книга с индексом:   { id }  не существует!\n\n")
+            print(f"Книга с индексом: { id }  не существует!\n\n")
             continue
         book_title = book_description.get("heading")
         book_cover_url = book_description.get("cover")
