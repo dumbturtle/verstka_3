@@ -163,9 +163,11 @@ def main():
         print(f'''
 Индекс: { id }
 Название: { book_title }
+Жанр:  { book_genres }
 Автор: { book_author }
 Обложка: {book_cover_path}
 Файл: { book_text_path }
+Комментарии: { book_comments }
 
 '''
               )
