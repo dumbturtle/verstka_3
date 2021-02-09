@@ -102,10 +102,7 @@ def download_book_text(url, filename, folder="books/") -> str:
     """
     sanitized_filename = sanitize_filename(filename)
     make_folder(folder)
-    try:
-        book_data = get_data_from_url(url)
-    except requests.exceptions.HTTPError:
-        return "Книга в формате txt отсутствует!"
+    book_data = get_data_from_url(url)
     string_filepath = f"{ os.path.join(folder, sanitized_filename) }.txt"
     file_with_data_filepath = write_file_text(book_data.text, string_filepath)
     return file_with_data_filepath
@@ -157,9 +154,14 @@ def main():
             f"{ id }.{ book_title }.{ book_cover_url.split('.')[-1] }"
         )
         book_text_filename = f"{ id }.{ book_title }"
-
-        book_text_path = download_book_text(book_text_url, book_text_filename)
-        book_cover_path = download_cover(book_cover_url, book_cover_filename)
+        try:
+            book_text_path = download_book_text(book_text_url, book_text_filename)
+        except requests.exceptions.HTTPError:
+            book_text_path = "Книга в формате txt отсутствует!"
+        try:
+            book_cover_path = download_cover(book_cover_url, book_cover_filename)
+        except requests.exceptions.HTTPError:
+            book_cover_path = "Обложка отсутствует!"
         print(
             f"Индекс: { id }\nНазвание: { book_title }\nАвтор: { book_author }\nОбложка: {book_cover_path} \nФайл: { book_text_path }\n\n"
         )
