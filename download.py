@@ -146,20 +146,27 @@ def main():
         book_genres = book_description.get("genres")
         book_comments = book_description.get("comments")
         book_author = book_description.get("author")
-        book_cover_filename = (
-            f"{ id }.{ book_title }.{ book_cover_url.split('.')[-1] }"
-        )
         book_text_filename = f"{ id }.{ book_title }"
         try:
             book_text_path = download_book_text(
                 book_text_url, book_text_filename)
         except requests.exceptions.HTTPError:
             book_text_path = "Книга в формате txt отсутствует!"
+        except requests.exceptions.ConnectionError:
+            print("Что-то пошло не так:( Проверьте подключение к интернету!")
+            time.sleep(4)
+            continue
         try:
+            book_cover_filename = (
+                f"{ id }.{ book_title }.{ book_cover_url.split('.')[-1] }")
             book_cover_path = download_cover(
                 book_cover_url, book_cover_filename)
-        except requests.exceptions.HTTPError:
+        except (requests.exceptions.HTTPError, AttributeError):
             book_cover_path = "Обложка отсутствует!"
+        except requests.exceptions.ConnectionError:
+            print("Что-то пошло не так:( Проверьте подключение к интернету!")
+            time.sleep(4)
+            continue
         print(f'''
 Индекс: { id }
 Название: { book_title }
