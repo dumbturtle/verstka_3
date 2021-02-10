@@ -3,7 +3,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit, unquote
 
 import requests
 from bs4 import BeautifulSoup
@@ -48,6 +48,13 @@ def write_file_cover(data, full_path_file):
     with open(full_path_file, "wb") as file:
         file.write(data)
     return full_path_file
+
+
+def extract_from_link_extension(link : str) -> str:
+    split_link = urlsplit(link)
+    split_link_unquote= unquote(split_link.path)
+    file_extension = os.path.splitext(split_link_unquote)[1]
+    return file_extension
 
 
 def parse_book_page(book_description_url):
@@ -157,8 +164,9 @@ def main():
             time.sleep(4)
             continue
         try:
+            book_cover_extension = extract_from_link_extension(book_cover_url)
             book_cover_filename = (
-                f"{ id }.{ book_title }.{ book_cover_url.split('.')[-1] }")
+                f"{ id }_{ book_title }{ book_cover_extension }")
             book_cover_path = download_cover(
                 book_cover_url, book_cover_filename)
         except (requests.exceptions.HTTPError, AttributeError):
