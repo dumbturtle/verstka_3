@@ -1,6 +1,5 @@
 import argparse
 import os
-import sys
 import textwrap
 import time
 from pathlib import Path
@@ -8,7 +7,7 @@ from urllib.parse import unquote, urljoin, urlsplit
 
 import requests
 from bs4 import BeautifulSoup
-from pathvalidate import sanitize_filename, sanitize_filepath
+from pathvalidate import sanitize_filename
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 
