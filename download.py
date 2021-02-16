@@ -88,7 +88,7 @@ def parse_book_page(html):
     }
 
 
-def download_book_text(url, filename, folder="books/") -> str:
+def download_book_text(url, filename, folder) -> str:
     """Функция для скачивания текстовых файлов.
     Args:
         url (str): Cсылка на текст, который хочется скачать.
@@ -104,7 +104,7 @@ def download_book_text(url, filename, folder="books/") -> str:
     return full_filepath
 
 
-def download_cover(url, filename, folder="images/") -> str:
+def download_cover(url, filename, folder) -> str:
     """Функция для скачивания файлов изображений.
     Args:
         url (str): Cсылка изображение, который хочется скачать.
@@ -126,8 +126,8 @@ def main():
     args = input_parser.parse_args()
     book_folder = "books/"
     cover_folder = "images/"
-    Path(f"./{ book_folder }").mkdir(parents=True, exist_ok=True)
-    Path(f"./{ cover_folder }").mkdir(parents=True, exist_ok=True)
+    Path(book_folder).mkdir(parents=True, exist_ok=True)
+    Path(cover_folder).mkdir(parents=True, exist_ok=True)
     for id in range(args.start_id, args.end_id + 1):
         book_text_url = f"https://tululu.org/txt.php?id={id}"
         book_description_url = f"https://tululu.org/b{id}/"
