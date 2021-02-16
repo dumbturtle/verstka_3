@@ -88,11 +88,6 @@ def parse_book_page(html):
     }
 
 
-def make_folder(folder):
-    Path(f"./{ folder }").mkdir(parents=True, exist_ok=True)
-    return folder
-
-
 def download_book_text(url, filename, folder="books/") -> str:
     """Функция для скачивания текстовых файлов.
     Args:
@@ -103,7 +98,6 @@ def download_book_text(url, filename, folder="books/") -> str:
         str: Путь до файла, куда сохранён текст.
     """
     sanitized_filename = sanitize_filename(filename)
-    make_folder(folder)
     book_data = get_data_from_url(url)
     full_filepath = f"{ os.path.join(folder, sanitized_filename) }.txt"
     write_file_text(book_data.text, full_filepath)
@@ -120,7 +114,6 @@ def download_cover(url, filename, folder="images/") -> str:
         str: Путь до файла, куда сохранён текст.
     """
     sanitized_filename = sanitize_filename(filename)
-    make_folder(folder)
     cover_data = get_data_from_url(url)
     full_filepath = os.path.join(folder, sanitized_filename)
     write_file_cover(cover_data.content, full_filepath)
@@ -131,6 +124,10 @@ def main():
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     input_parser = create_input_parser()
     args = input_parser.parse_args()
+    book_folder = "books/"
+    cover_folder = "images/"
+    Path(f"./{ book_folder }").mkdir(parents=True, exist_ok=True)
+    Path(f"./{ cover_folder }").mkdir(parents=True, exist_ok=True)
     for id in range(args.start_id, args.end_id + 1):
         book_text_url = f"https://tululu.org/txt.php?id={id}"
         book_description_url = f"https://tululu.org/b{id}/"
@@ -152,7 +149,7 @@ def main():
         book_text_filename = f"{ id }.{ book_title }"
         try:
             book_text_path = download_book_text(
-                book_text_url, book_text_filename)
+                book_text_url, book_text_filename, book_folder)
         except requests.exceptions.HTTPError:
             book_text_path = "Книга в формате txt отсутствует!"
         except requests.exceptions.ConnectionError:
@@ -166,7 +163,7 @@ def main():
             book_cover_filename = (
                 f"{ id }_{ book_title }{ book_cover_extension }")
             book_cover_path = download_cover(
-                book_cover_link, book_cover_filename)
+                book_cover_link, book_cover_filename, cover_folder)
         except (requests.exceptions.HTTPError, AttributeError):
             book_cover_path = "Обложка отсутствует!"
         except requests.exceptions.ConnectionError:
