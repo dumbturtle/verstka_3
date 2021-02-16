@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import textwrap
 import time
 from pathlib import Path
 from urllib.parse import unquote, urljoin, urlsplit
@@ -170,17 +171,17 @@ def main():
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
             time.sleep(4)
             continue
-        print(f'''
-Индекс: { id }
-Название: { book_title }
-Жанр:  { book_genres }
-Автор: { book_author }
-Обложка: {book_cover_path }
-Файл: { book_text_path }
-Комментарии: { book_comments }
+        print(textwrap.dedent(f'''
+            Индекс: { id }
+            Название: { book_title }
+            Жанр:  { book_genres }
+            Автор: { book_author }
+            Обложка: {book_cover_path }
+            Файл: { book_text_path }
+            Комментарии: { book_comments }
 
-'''
-              )
+            '''
+                              ))
 
 
 if __name__ == "__main__":
