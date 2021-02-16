@@ -135,38 +135,30 @@ def main():
         try:
             data_from_url = get_data_from_url(book_description_url)
             book_description = parse_book_page(data_from_url.text)
-        except requests.exceptions.ConnectionError:
-            print("Что-то пошло не так:( Проверьте подключение к интернету!")
-            time.sleep(4)
-            continue
-        except requests.exceptions.HTTPError:
-            print(f"Книга с индексом: { id }  не существует!\n\n")
-            continue
-        book_title = book_description.get("heading")
-        book_cover_html_link = book_description.get("book_cover_html_link")
-        book_genres = book_description.get("genres")
-        book_comments = book_description.get("comments")
-        book_author = book_description.get("author")
-        book_text_filename = f"{ id }.{ book_title }"
-        try:
-            book_text_path = download_book_text(
-                book_text_url, book_text_filename, book_folder)
-        except requests.exceptions.HTTPError:
-            book_text_path = "Книга в формате txt отсутствует!"
-        except requests.exceptions.ConnectionError:
-            print("Что-то пошло не так:( Проверьте подключение к интернету!")
-            time.sleep(4)
-            continue
-        try:
-            book_cover_link = urljoin(
-                book_description_url, book_cover_html_link)
-            book_cover_extension = extract_from_link_extension(book_cover_link)
-            book_cover_filename = (
-                f"{ id }_{ book_title }{ book_cover_extension }")
-            book_cover_path = download_cover(
-                book_cover_link, book_cover_filename, cover_folder)
-        except (requests.exceptions.HTTPError, AttributeError):
-            book_cover_path = "Обложка отсутствует!"
+            book_title = book_description.get("heading", "no_title")
+            book_cover_html_link = book_description.get(
+                "book_cover_html_link", "no_cover")
+            book_genres = book_description["genres"]
+            book_comments = book_description["comments"]
+            book_author = book_description.get(
+                "author", "Информация об авторе отсутвует.")
+            book_text_filename = f"{ id }.{ book_title }"
+            try:
+                book_text_path = download_book_text(
+                    book_text_url, book_text_filename, book_folder)
+            except requests.exceptions.HTTPError:
+                book_text_path = "Книга в формате txt отсутствует!"
+            try:
+                book_cover_link = urljoin(
+                    book_description_url, book_cover_html_link)
+                book_cover_extension = extract_from_link_extension(
+                    book_cover_link)
+                book_cover_filename = (
+                    f"{ id }_{ book_title }{ book_cover_extension }")
+                book_cover_path = download_cover(
+                    book_cover_link, book_cover_filename, cover_folder)
+            except (requests.exceptions.HTTPError, AttributeError):
+                book_cover_path = "Обложка отсутствует!"
         except requests.exceptions.ConnectionError:
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
             time.sleep(4)
