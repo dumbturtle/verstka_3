@@ -3,7 +3,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from urllib.parse import urljoin, urlsplit, unquote
+from urllib.parse import unquote, urljoin, urlsplit
 
 import requests
 from bs4 import BeautifulSoup
@@ -55,13 +55,11 @@ def extract_from_link_extension(link: str) -> str:
     return file_extension
 
 
-def parse_book_page(book_description_url):
-    data_from_url = get_data_from_url(book_description_url)
-    tululu_html = data_from_url.text
-    tululu_html_soup = BeautifulSoup(tululu_html, "lxml")
+def parse_book_page(html):
+    tululu_html_soup = BeautifulSoup(html, "lxml")
     title_tag = tululu_html_soup.find("body").find(
         "div", id="content").find("h1")
-    cover_link = (
+    book_cover_html_link = (
         tululu_html_soup.find("body").find(
             "div", class_="bookimage").find("img")["src"]
     )
@@ -81,11 +79,10 @@ def parse_book_page(book_description_url):
     )
     book_genres = [genre.text for genre in genre_tags]
     book_title, book_author = title_tag.text.split("::")
-    book_cover_full_link = urljoin(book_description_url, cover_link)
     return {
         "heading": book_title.strip(),
         "author": book_author.strip(),
-        "cover": book_cover_full_link,
+        "book_cover_html_link": book_cover_html_link,
         "genres": book_genres,
         "comments": book_comments,
     }
@@ -138,7 +135,8 @@ def main():
         book_text_url = f"https://tululu.org/txt.php?id={id}"
         book_description_url = f"https://tululu.org/b{id}/"
         try:
-            book_description = parse_book_page(book_description_url)
+            data_from_url = get_data_from_url(book_description_url)
+            book_description = parse_book_page(data_from_url.text)
         except requests.exceptions.ConnectionError:
             print("Что-то пошло не так:( Проверьте подключение к интернету!")
             time.sleep(4)
@@ -147,7 +145,7 @@ def main():
             print(f"Книга с индексом: { id }  не существует!\n\n")
             continue
         book_title = book_description.get("heading")
-        book_cover_url = book_description.get("cover")
+        book_cover_html_link = book_description.get("book_cover_html_link")
         book_genres = book_description.get("genres")
         book_comments = book_description.get("comments")
         book_author = book_description.get("author")
@@ -162,11 +160,13 @@ def main():
             time.sleep(4)
             continue
         try:
-            book_cover_extension = extract_from_link_extension(book_cover_url)
+            book_cover_link = urljoin(
+                book_description_url, book_cover_html_link)
+            book_cover_extension = extract_from_link_extension(book_cover_link)
             book_cover_filename = (
                 f"{ id }_{ book_title }{ book_cover_extension }")
             book_cover_path = download_cover(
-                book_cover_url, book_cover_filename)
+                book_cover_link, book_cover_filename)
         except (requests.exceptions.HTTPError, AttributeError):
             book_cover_path = "Обложка отсутствует!"
         except requests.exceptions.ConnectionError:
@@ -178,7 +178,7 @@ def main():
 Название: { book_title }
 Жанр:  { book_genres }
 Автор: { book_author }
-Обложка: {book_cover_path}
+Обложка: {book_cover_path }
 Файл: { book_text_path }
 Комментарии: { book_comments }
 
