@@ -38,21 +38,19 @@ def get_data_from_url(url):
     return tululu_response
 
 
-def write_file_text(data, full_path_file):
-    with open(full_path_file, "w") as file:
+def write_file_text(data, filepath):
+    with open(filepath, "w") as file:
         file.write(data)
-    return full_path_file
 
 
-def write_file_cover(data, full_path_file):
-    with open(full_path_file, "wb") as file:
+def write_file_cover(data, filepath):
+    with open(filepath, "wb") as file:
         file.write(data)
-    return full_path_file
 
 
-def extract_from_link_extension(link : str) -> str:
+def extract_from_link_extension(link: str) -> str:
     split_link = urlsplit(link)
-    split_link_unquote= unquote(split_link.path)
+    split_link_unquote = unquote(split_link.path)
     file_extension = os.path.splitext(split_link_unquote)[1]
     return file_extension
 
@@ -111,8 +109,8 @@ def download_book_text(url, filename, folder="books/") -> str:
     make_folder(folder)
     book_data = get_data_from_url(url)
     full_filepath = f"{ os.path.join(folder, sanitized_filename) }.txt"
-    file_text_filepath = write_file_text(book_data.text, full_filepath)
-    return file_text_filepath
+    write_file_text(book_data.text, full_filepath)
+    return full_filepath
 
 
 def download_cover(url, filename, folder="images/") -> str:
@@ -128,8 +126,8 @@ def download_cover(url, filename, folder="images/") -> str:
     make_folder(folder)
     cover_data = get_data_from_url(url)
     full_filepath = os.path.join(folder, sanitized_filename)
-    file_cover_filepath = write_file_cover(cover_data.content, full_filepath)
-    return file_cover_filepath
+    write_file_cover(cover_data.content, full_filepath)
+    return full_filepath
 
 
 def main():
